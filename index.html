@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>АСТРА — Персональный Навигатор | Элитный Доступ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@100;200;300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --surface-color: #fcfcfc;
+            --text-main: #050505;
+            --text-muted: #3a3a3a;
+            --text-light: #999999;
+            --border-color: #e5e5e5;
+            --accent: #000000;
+            --transition-smooth: 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 300;
+            color: var(--text-main);
+            background: var(--bg-color);
+            line-height: 2;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4, h5 { font-family: 'Cormorant Garamond', serif; font-weight: 400; text-transform: uppercase; color: var(--accent); }
+        h1 { font-size: clamp(40px, 10vw, 90px); letter-spacing: 0.3em; text-align: center; margin-right: -0.3em; }
+        h2 { font-size: clamp(24px, 5vw, 42px); letter-spacing: 0.15em; display: flex; align-items: center; gap: 20px; margin-bottom: 50px; line-height: 1.3;}
+        h3 { font-size: 22px; letter-spacing: 0.2em; text-align: center; margin-bottom: 60px; font-weight: 500; }
+        h4 { font-size: 16px; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; }
+        
+        p { font-size: 14.5px; color: var(--text-muted); margin-bottom: 2.5rem; text-align: justify; line-height: 2.2; font-weight: 300; }
+        .tech-font { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; }
+
+        .editorial-grid {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 0;
+            background-image: linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 5vw 5vw;
+        }
+
+        .content-wrapper { position: relative; z-index: 10; width: 100%; max-width: 1300px; margin: 0 auto; padding: 0 30px; }
+        
+        .reveal-on-scroll { opacity: 0; transform: translateY(40px); transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal-on-scroll.visible { opacity: 1; transform: translateY(0); }
+
+        .step-container { display: none; padding: 100px 0; min-height: 100vh; opacity: 0; }
+        .step-container.active { display: block; animation: fadeIn var(--transition-smooth) forwards; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--bg-color); border: 1px solid var(--border-color); padding: clamp(40px, 8vw, 100px); margin-bottom: 100px; position: relative; transition: var(--transition-smooth); }
+        .card::before { content: ''; position: absolute; top: 6px; left: 6px; right: 6px; bottom: 6px; border: 1px solid rgba(0,0,0,0.04); pointer-events: none; }
+        .card:hover { border-color: rgba(0,0,0,0.2); box-shadow: 0 30px 80px rgba(0,0,0,0.03); }
+
+        .input-group { position: relative; margin-bottom: 50px; }
+        .elegant-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border-color); padding: 20px 0; font-size: 14px; font-family: inherit; color: var(--accent); outline: none; letter-spacing: 4px; text-transform: uppercase; transition: var(--transition-smooth); }
+        .elegant-input::placeholder { color: #d0d0d0; font-weight: 200; }
+        .elegant-input:focus { border-bottom-color: var(--accent); padding-left: 10px; }
+        .input-label { position: absolute; top: -10px; left: 0; font-size: 9px; color: var(--text-light); text-transform: uppercase; letter-spacing: 3px; font-weight: 500; }
+
+        .photo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 50px; margin: 60px 0; }
+        .upload-zone { height: 380px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; background: var(--surface-color); transition: var(--transition-smooth); border: 1px solid var(--border-color); }
+        .upload-zone::before, .upload-zone::after, .upload-zone .corner-1, .upload-zone .corner-2 { content: ''; position: absolute; width: 20px; height: 20px; border-color: var(--text-light); border-style: solid; transition: var(--transition-smooth); z-index: 5; pointer-events: none; }
+        .upload-zone::before { top: 15px; left: 15px; border-width: 1px 0 0 1px; } .upload-zone::after { top: 15px; right: 15px; border-width: 1px 1px 0 0; }
+        .upload-zone .corner-1 { bottom: 15px; left: 15px; border-width: 0 0 1px 1px; } .upload-zone .corner-2 { bottom: 15px; right: 15px; border-width: 0 1px 1px 0; }
+        .upload-zone:hover { border-color: var(--accent); background: #fff; }
+        .upload-zone:hover::before, .upload-zone:hover::after, .upload-zone:hover .corner-1, .upload-zone:hover .corner-2 { border-color: var(--accent); width: 30px; height: 30px; }
+        .upload-zone img { position: absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: 2; display:none; opacity: 0.85; filter: grayscale(1) contrast(1.1); }
+        .upload-content { position: relative; z-index: 3; text-align: center; background: rgba(255,255,255,0.95); padding: 40px; border-radius: 50%; backdrop-filter: blur(10px); box-shadow: 0 15px 40px rgba(0,0,0,0.06); transition: var(--transition-smooth); }
+        .icon-circle { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: var(--accent); border: 1px solid var(--border-color); border-radius: 50%; }
+
+        .btn-main {
+            position: relative; overflow: hidden; background: transparent; color: var(--accent); border: 1px solid var(--accent);
+            padding: 25px 70px; font-size: 11px; letter-spacing: 6px; text-transform: uppercase; cursor: pointer; transition: var(--transition-smooth);
+            font-family: inherit; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 15px;
+            width: 100%; max-width: 450px; margin: 0 auto; z-index: 1;
+        }
+        .btn-main::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--accent); transform: scaleX(0); transform-origin: right; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); z-index: -1; }
+        .btn-main:hover::before { transform: scaleX(1); transform-origin: left; }
+        .btn-main:hover { color: #fff; border-color: var(--accent); letter-spacing: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+
+        .results-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 80px; align-items: stretch; margin-top: 60px; }
+        .results-grid.reverse { grid-template-columns: 1.5fr 1fr; }
+        .text-block { display: flex; flex-direction: column; justify-content: center; }
+        
+        .blueprint-container { position: relative; width: 100%; padding: 20px; border: 1px solid var(--border-color); background: #fff; box-shadow: 0 30px 80px rgba(0,0,0,0.05); }
+        .image-box { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; overflow: hidden; }
+        .image-inner { position: relative; width: 100%; height: 100%; background: #050505; overflow: hidden; }
+        .image-inner img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) contrast(130%) brightness(0.7); opacity: 0.9; mix-blend-mode: luminosity; }
+        
+        .hud-grid { position: absolute; top:0; left:0; width: 100%; height: 100%; background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 10% 10%; z-index: 10; pointer-events: none; }
+        .scan-line-vertical { position: absolute; top: 0; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.8); box-shadow: 0 0 20px 2px rgba(255,255,255,0.5); animation: scanV 4s cubic-bezier(0.4, 0, 0.2, 1) infinite; z-index: 20; }
+        @keyframes scanV { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        
+        .hud-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 15; pointer-events: none; }
+        .hud-text { font-family: 'Space Mono', monospace; font-size: 5px; fill: rgba(255,255,255,0.8); letter-spacing: 1px; text-transform: uppercase; }
+        
+        .matrix-number { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: clamp(120px, 18vw, 200px); font-family: 'Cormorant Garamond'; color: #fff; z-index: 5; text-shadow: 0 0 60px rgba(255,255,255,0.4); font-weight: 300; line-height: 1; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 80px; border-top: 1px solid var(--border-color); padding-top: 50px; }
+        .stat-card { text-align: center; padding: 20px; position: relative; }
+        .stat-card:not(:last-child)::after { content: ''; position: absolute; right: 0; top: 30%; bottom: 30%; width: 1px; background: var(--border-color); }
+        .stat-val { font-family: 'Cormorant Garamond'; font-size: 48px; display: block; color: var(--accent); font-weight: 400; line-height: 1; margin-bottom: 15px; }
+        .stat-label { font-size: 9px; text-transform: uppercase; color: var(--text-light); letter-spacing: 4px; font-weight: 500; }
+
+        /* ПРОГНОЗЫ */
+        .pred-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 40px; margin-top: 60px; }
+        .pred-card { border: 1px solid var(--border-color); padding: 50px 40px; background: var(--bg-color); transition: var(--transition-smooth); position: relative; display: flex; flex-direction: column; }
+        .pred-card::before { content: ''; position: absolute; top: 8px; left: 8px; right: 8px; bottom: 8px; border: 1px solid rgba(0,0,0,0.03); pointer-events: none; transition: 0.5s; }
+        .pred-card:hover { border-color: var(--accent); box-shadow: 0 25px 60px rgba(0,0,0,0.05); transform: translateY(-8px); }
+        .pred-card:hover::before { border-color: rgba(0,0,0,0.15); }
+        .pred-month { font-family: 'Cormorant Garamond'; font-size: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 35px; text-align: center; letter-spacing: 6px; font-weight: 500; color: var(--accent);}
+        .pred-row { margin-bottom: 25px; flex-grow: 1; }
+        .pred-row:last-child { margin-bottom: 0; padding-top: 20px; border-top: 1px dashed var(--border-color); }
+        .pred-tag { font-family: 'Space Mono', monospace; font-size: 8px; text-transform: uppercase; color: var(--text-light); letter-spacing: 2px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .pred-txt { font-size: 13.5px; color: var(--text-muted); line-height: 1.9; font-weight: 400; margin: 0; }
+
+        /* КАРТЫ ТАРО */
+        .tarot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 50px; margin-top: 60px; perspective: 1500px; }
+        .tarot-card-wrapper { height: 500px; position: relative; width: 100%; }
+        .tarot-card { width: 100%; height: 100%; transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1); transform-style: preserve-3d; position: relative; cursor: pointer; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
+        .tarot-card.flipped { transform: rotateY(180deg); }
+        .tarot-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border: 1px solid var(--border-color); background: var(--bg-color); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 30px; text-align: center; }
+        .tarot-front { transform: rotateY(180deg); border-color: var(--accent); }
+        .tarot-back { background: var(--surface-color); border: 1px solid var(--border-color); }
+        .tarot-back::after { content: ''; position: absolute; top: 12px; left: 12px; right: 12px; bottom: 12px; border: 1px dashed var(--border-color); }
+        .tarot-back svg { width: 60px; height: 60px; color: var(--border-color); animation: spinIcon 30s linear infinite; }
+        
+        .tarot-time { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 5px; text-transform: uppercase; color: var(--text-light); margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; width: 100%; }
+        .tarot-title { font-family: 'Cormorant Garamond'; font-size: 24px; letter-spacing: 3px; margin-bottom: 20px; color: var(--accent); font-weight: 600; }
+        .tarot-text { font-size: 13px; color: var(--text-muted); line-height: 1.9; }
+        .tarot-icon { margin-bottom: 30px; color: var(--accent); }
+
+        /* ИТОГ И ФИНАЛЬНАЯ КАРТА */
+        .card-grand-finale { border: 1px solid var(--accent); padding: clamp(50px, 8vw, 150px) clamp(20px, 5vw, 100px); margin-top: 150px; position: relative; background: var(--surface-color); }
+        .final-report-container { text-align: left; max-width: 1000px; margin: 80px auto; column-count: 2; column-gap: 80px; }
+        .final-report-container p { font-size: 14.5px; margin-bottom: 30px; position: relative; }
+        .final-report-container p::before { content: '■'; position: absolute; left: -25px; top: 2px; font-size: 10px; color: var(--accent); }
+        
+        .final-map-wrapper { width: 100%; height: 700px; background: #020202; margin: 100px 0; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 1px solid #222; box-shadow: inset 0 0 100px rgba(0,0,0,1); }
+        
+        /* БЛОК ПОДДЕРЖКИ (МЕРЦАЮЩИЙ) */
+        .premium-support-box { border: 1px solid var(--border-color); padding: 80px 40px; text-align: center; margin-top: 100px; position: relative; background: var(--bg-color); }
+        .premium-support-box::before { content: ''; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px; border: 1px solid rgba(0,0,0,0.03); }
+        .support-title { font-family: 'Cormorant Garamond'; letter-spacing: 8px; font-size: 26px; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
+        .support-line { width: 60px; height: 1px; background: var(--accent); margin: 0 auto 30px; }
+        
+        .btn-donate { 
+            display: inline-flex; align-items: center; justify-content: center; gap: 15px; 
+            background: var(--accent); color: #fff; border: 1px solid var(--accent); 
+            padding: 25px 70px; text-decoration: none; font-size: 11px; letter-spacing: 8px; 
+            text-transform: uppercase; margin-top: 40px; transition: var(--transition-smooth); 
+            font-family: inherit; font-weight: 500; position: relative; z-index: 2;
+            animation: elegantPulseGlow 2.5s infinite alternate;
+        }
+        .btn-donate:hover { background: #fff; color: var(--accent); animation: none; box-shadow: 0 20px 50px rgba(0,0,0,0.15); transform: translateY(-3px); }
+        
+        @keyframes elegantPulseGlow {
+            0% { box-shadow: 0 0 10px rgba(0,0,0,0.4); transform: scale(1); }
+            100% { box-shadow: 0 0 35px rgba(0,0,0,0.9); transform: scale(1.02); }
+        }
+
+        /* ТИТРЫ (КИНЕМАТОГРАФИЧНЫЕ) */
+        .credits-container { margin-top: 150px; padding-top: 80px; border-top: 1px solid rgba(0,0,0,0.1); text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .credits-role { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 6px; color: var(--text-light); margin-bottom: 20px; text-transform: uppercase; }
+        .credits-name { 
+            font-family: 'Montserrat', sans-serif; 
+            font-size: 24px; 
+            letter-spacing: 24px; 
+            color: var(--accent); 
+            text-transform: uppercase; 
+            font-weight: 300; 
+            margin-right: -24px; /* Компенсация letter-spacing для центровки */
+            font-style: normal; 
+        }
+
+        @media (max-width: 1024px) {
+            .results-grid, .results-grid.reverse { grid-template-columns: 1fr; gap: 60px; }
+            .results-grid.reverse .text-block { order: 2; }
+            .results-grid.reverse .blueprint-container { order: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .final-report-container { column-count: 1; padding-left: 25px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 0; }
+            .stat-card:nth-child(2)::after { display: none; }
+            .stat-card { border-bottom: 1px solid var(--border-color); }
+            .stat-card:nth-last-child(-n+2) { border-bottom: none; }
+            .card { padding: 50px 25px; }
+            .matrix-number { font-size: 120px; }
+            .btn-main, .btn-donate { padding: 25px; width: 100%; max-width: none; }
+            .upload-zone { height: 280px; }
+            .credits-name { font-size: 16px; letter-spacing: 16px; margin-right: -16px; }
+        }
+
+        /* АНИМАЦИИ ИКОНОК */
+        .icon-premium-spin { animation: spinIcon 12s linear infinite; display: inline-block; transform-origin: center center; }
+        .icon-premium-spin-reverse { animation: spinIcon 15s linear infinite reverse; display: inline-block; transform-origin: center center; }
+        
+        @keyframes spinIcon { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .svg-spin-complex { animation: spinComplex 40s cubic-bezier(0.4, 0, 0.2, 1) infinite; transform-origin: center; }
+        .svg-spin-slow { animation: spinIcon 120s linear infinite; transform-origin: center; }
+        .svg-spin-rev { animation: spinIcon 90s linear infinite reverse; transform-origin: center; }
+        @keyframes spinComplex { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.05); } 100% { transform: rotate(360deg) scale(1); } }
+
+        .reveal-point { margin-bottom: 50px; opacity: 0; transform: translateY(30px); transition: 1s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal-point.active { opacity: 1; transform: translateY(0); }
+        
+        .glitch-text { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 6px; color: var(--text-muted); text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <div class="editorial-grid"></div>
+
+    <div class="content-wrapper">
+        
+        <div id="step-0" class="step-container active">
+            <div style="text-align: center; margin-top: 60px; margin-bottom: 80px;">
+                <svg style="width: 120px; height: 120px; margin-bottom: 40px;" viewBox="0 0 100 100" class="svg-spin-complex">
+                    <circle class="svg-spin-slow" cx="50" cy="50" r="48" fill="none" stroke="var(--accent)" stroke-width="0.3" stroke-dasharray="1 6"/>
+                    <circle class="svg-spin-rev" cx="50" cy="50" r="35" fill="none" stroke="var(--accent)" stroke-width="0.2" stroke-dasharray="4 8"/>
+                    <polygon points="50,15 55,45 85,50 55,55 50,85 45,55 15,50 45,45" fill="none" stroke="var(--accent)" stroke-width="0.5"/>
+                    <circle cx="50" cy="50" r="4" fill="var(--accent)"/>
+                </svg>
+                <h1>А С Т Р А</h1>
+                <p class="tech-font" style="margin-top: 20px; color: var(--text-light); text-align: center;">ПЕРСОНАЛЬНЫЙ АНАЛИТИЧЕСКИЙ ИНТЕРФЕЙС</p>
+            </div>
+
+            <div class="card" style="max-width: 850px; margin: 0 auto;">
+                <h3>Идентификация Субъекта</h3>
+                
+                <div class="input-group">
+                    <label class="input-label">Полное Имя и Фамилия</label>
+                    <input type="text" id="in-name" class="elegant-input" placeholder=" " required>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px;">
+                    <div class="input-group">
+                        <label class="input-label">Дата Рождения</label>
+                        <input type="date" id="in-dob" class="elegant-input" required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Город Рождения</label>
+                        <input type="text" id="in-loc" class="elegant-input" placeholder=" ">
+                    </div>
+                </div>
+
+                <div class="photo-grid">
+                    <div class="upload-zone" onclick="document.getElementById('file-face').click()">
+                        <div class="corner-1"></div><div class="corner-2"></div>
+                        <img id="img-face" alt="Лицо">
+                        <div class="upload-content">
+                            <div class="icon-circle"><i data-lucide="scan-face" size="28" stroke-width="1.5"></i></div>
+                            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 5px; font-weight: 500; color: var(--accent); display: block;">Архитектура Лица</span>
+                            <span class="tech-font" style="display:block; margin-top: 10px; color: var(--text-muted);">[ ЗАГРУЗИТЬ ДАННЫЕ ]</span>
+                        </div>
+                        <input type="file" id="file-face" accept="image/*" style="display:none" onchange="preview(this, 'face')">
+                    </div>
+                    <div class="upload-zone" onclick="document.getElementById('file-palm').click()">
+                        <div class="corner-1"></div><div class="corner-2"></div>
+                        <img id="img-palm" alt="Ладонь">
+                        <div class="upload-content">
+                            <div class="icon-circle"><i data-lucide="hand" size="28" stroke-width="1.5"></i></div>
+                            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 5px; font-weight: 500; color: var(--accent); display: block;">Топография Ладони</span>
+                            <span class="tech-font" style="display:block; margin-top: 10px; color: var(--text-muted);">[ ЛЕВАЯ РУКА ]</span>
+                        </div>
+                        <input type="file" id="file-palm" accept="image/*" style="display:none" onchange="preview(this, 'palm')">
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 80px;">
+                    <button class="btn-main" onclick="process()"><i data-lucide="fingerprint" class="icon-premium-spin" size="18"></i> ИНИЦИИРОВАТЬ СИНТЕЗ</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="step-1" class="step-container" style="display: none; align-items: center; justify-content: center; flex-direction: column; min-height: 85vh;">
+            <svg style="width: 150px; height: 150px; margin-bottom: 60px;" viewBox="0 0 100 100">
+                <circle class="svg-spin-slow" cx="50" cy="50" r="46" fill="none" stroke="var(--accent)" stroke-width="0.2" stroke-dasharray="2 8"/>
+                <circle class="svg-spin-rev" cx="50" cy="50" r="25" fill="none" stroke="var(--accent)" stroke-width="0.5" stroke-dasharray="10 20"/>
+                <rect x="49.5" y="10" width="1" height="80" fill="var(--accent)" opacity="0.2" class="svg-spin-slow"/>
+                <rect x="10" y="49.5" width="80" height="1" fill="var(--accent)" opacity="0.2" class="svg-spin-slow"/>
+            </svg>
+            <h2 style="justify-content: center; font-weight: 200; letter-spacing: 20px; margin-bottom: 30px; margin-right: -20px;">СИНТЕЗ</h2>
+            <p id="loading-msg" class="glitch-text">КАЛИБРОВКА БИОМЕТРИЧЕСКИХ ПАТТЕРНОВ...</p>
+        </div>
+
+        <div id="step-2" class="step-container" style="padding-bottom: 0;">
+            <div class="reveal-on-scroll" style="text-align: center; margin-bottom: 150px;">
+                <h2 style="justify-content: center; font-size: clamp(40px, 8vw, 70px); font-weight: 200; border-bottom: 1px solid var(--border-color); padding-bottom: 60px; display: inline-flex;">ПЕРСОНАЛЬНОЕ ДОСЬЕ</h2>
+                <p id="out-name" style="text-align: center; margin-top: 50px; font-weight: 400; letter-spacing: 12px; text-transform: uppercase; color: var(--accent); font-size: 18px;"></p>
+                <div class="tech-font" style="margin-top: 10px; color: var(--text-light);">ИДЕНТИФИКАТОР: <span id="random-id"></span></div>
+            </div>
+
+            <!-- 1. ЛИНГВО-ГЕОГРАФИЧЕСКИЙ КОД -->
+            <section class="card reveal-on-scroll" id="section-geo">
+                <h2><i data-lucide="globe" size="36" class="icon-premium-spin" stroke-width="1" style="opacity: 0.4;"></i> 01. Лингво-Гео Анализ</h2>
+                <div class="results-grid">
+                    <div class="blueprint-container">
+                        <div class="image-box" style="background: #111;">
+                            <div class="image-inner">
+                                <svg class="hud-svg" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.3" stroke-dasharray="2 4" class="svg-spin-slow"/>
+                                    <ellipse cx="50" cy="50" rx="30" ry="40" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.3" class="svg-spin-rev"/>
+                                    <ellipse cx="50" cy="50" rx="15" ry="40" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.3"/>
+                                    <line x1="20" y1="50" x2="80" y2="50" stroke="rgba(255,255,255,0.3)" stroke-width="0.3"/>
+                                    <line x1="25" y1="30" x2="75" y2="30" stroke="rgba(255,255,255,0.1)" stroke-width="0.3"/>
+                                    <line x1="25" y1="70" x2="75" y2="70" stroke="rgba(255,255,255,0.1)" stroke-width="0.3"/>
+                                    <text x="5" y="8" class="hud-text">СИСТЕМА.ЛОКАЦИЯ.АКТИВНА</text>
+                                    <text x="5" y="95" class="hud-text" id="hud-city">ГЕОДАННЫЕ: ПОДТВЕРЖДЕНО</text>
+                                </svg>
+                                <div class="scan-line-vertical"></div>
+                                <div class="hud-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-block" id="out-geo-text"></div>
+                </div>
+            </section>
+
+            <!-- 2. ТЕНЕВОЕ ПРОШЛОЕ -->
+            <section class="card reveal-on-scroll">
+                <h2><i data-lucide="history" size="36" class="icon-premium-spin-reverse" stroke-width="1" style="opacity: 0.4;"></i> 02. Теневое Прошлое</h2>
+                <div class="results-grid reverse">
+                    <div class="text-block" id="out-past-text"></div>
+                    <div class="blueprint-container">
+                        <div class="image-box">
+                            <div class="image-inner" style="background: #111;">
+                                <div class="scan-line-vertical" style="animation-duration: 5s;"></div>
+                                <div class="hud-grid"></div>
+                                <svg class="hud-svg" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5" stroke-dasharray="2 10" class="svg-spin-rev"/>
+                                    <path d="M 30 20 L 70 20 L 50 50 L 70 80 L 30 80 L 50 50 Z" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"/>
+                                    <circle cx="50" cy="50" r="2" fill="#fff" class="icon-premium-spin"/>
+                                    <text x="5" y="8" class="hud-text">РЕВЕРС.АНАЛИЗ.ЗАПУЩЕН</text>
+                                    <text x="5" y="95" class="hud-text">АРХИВ: ДОСТУП РАЗРЕШЕН</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. НУМЕРОЛОГИЯ -->
+            <section class="card reveal-on-scroll">
+                <h2><i data-lucide="hexagon" size="36" class="icon-premium-spin" stroke-width="1" style="opacity: 0.4;"></i> 03. Матрица Личности</h2>
+                <div class="results-grid">
+                    <div class="blueprint-container">
+                        <div class="image-box">
+                            <div class="image-inner" style="background: #111;">
+                                <div id="out-number" class="matrix-number"></div>
+                                <div class="scan-line-vertical"></div>
+                                <div class="hud-grid"></div>
+                                <svg class="hud-svg" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.2" stroke-dasharray="1 3" class="svg-spin-slow"/>
+                                    <path d="M 10 10 L 20 10 M 10 10 L 10 20 M 90 10 L 80 10 M 90 10 L 90 20 M 10 90 L 20 90 M 10 90 L 10 80 M 90 90 L 80 90 M 90 90 L 90 80" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"/>
+                                    <text x="5" y="8" class="hud-text">СИСТЕМА.ЯДРО.АКТИВНО</text>
+                                    <text x="5" y="95" class="hud-text">ИНДЕКС: ПОДСЧЕТ</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-block" id="out-num-text"></div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card"><span class="stat-val" id="stat-1">0</span><span class="stat-label">Коэффициент Интеллекта</span></div>
+                    <div class="stat-card"><span class="stat-val" id="stat-2">0</span><span class="stat-label">Индекс Адаптивности</span></div>
+                    <div class="stat-card"><span class="stat-val" id="stat-3">0</span><span class="stat-label">Потенциал Лидера</span></div>
+                    <div class="stat-card"><span class="stat-val" id="stat-4">0</span><span class="stat-label">Энергоемкость</span></div>
+                </div>
+            </section>
+
+            <!-- 4. ФИЗИОГНОМИКА -->
+            <section class="card reveal-on-scroll">
+                <h2><i data-lucide="scan-face" size="36" class="icon-premium-spin-reverse" stroke-width="1" style="opacity: 0.4;"></i> 04. Биометрия Лика</h2>
+                <div class="results-grid reverse">
+                    <div class="text-block" id="out-phys-text"></div>
+                    <div class="blueprint-container">
+                        <div class="image-box">
+                            <div class="image-inner">
+                                <img id="res-face" src="">
+                                <div class="scan-line-vertical" style="animation-duration: 3.2s;"></div>
+                                <div class="hud-grid"></div>
+                                <svg class="hud-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                    <path d="M 5 5 L 15 5 M 5 5 L 5 15 M 95 5 L 85 5 M 95 5 L 95 15 M 5 95 L 15 95 M 5 95 L 5 85 M 95 95 L 85 95 M 95 95 L 95 85" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="0.3"/>
+                                    <line x1="50" y1="10" x2="50" y2="90" stroke="rgba(255,255,255,0.3)" stroke-width="0.2" stroke-dasharray="2 2"/>
+                                    <line x1="20" y1="45" x2="80" y2="45" stroke="rgba(255,255,255,0.3)" stroke-width="0.2"/>
+                                    <polygon points="35,45 50,70 65,45" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.3"/>
+                                    <circle cx="35" cy="45" r="1.5" fill="#fff"/>
+                                    <circle cx="65" cy="45" r="1.5" fill="#fff"/>
+                                    <circle cx="50" cy="70" r="1.5" fill="#fff"/>
+                                    <text x="5" y="8" class="hud-text">СИММЕТРИЯ: ОПТИМАЛЬНО</text>
+                                    <text x="5" y="95" class="hud-text">МИКРОВЫРАЖЕНИЯ: АНАЛИЗ...</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. ХИРОМАНТИЯ -->
+            <section class="card reveal-on-scroll">
+                <h2><i data-lucide="hand" size="36" class="icon-premium-spin" stroke-width="1" style="opacity: 0.4;"></i> 05. Топография Руки</h2>
+                <div class="results-grid">
+                    <div class="blueprint-container">
+                        <div class="image-box">
+                            <div class="image-inner">
+                                <img id="res-palm" src="">
+                                <div class="scan-line-vertical" style="animation-duration: 4.8s;"></div>
+                                <div class="hud-grid"></div>
+                                <svg class="hud-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                    <path d="M 5 5 L 15 5 M 5 5 L 5 15 M 95 5 L 85 5 M 95 5 L 95 15 M 5 95 L 15 95 M 5 95 L 5 85 M 95 95 L 85 95 M 95 95 L 95 85" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="0.3"/>
+                                    <path d="M40 20 Q 20 60 30 90" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="0.5" stroke-dasharray="1 2">
+                                        <animate attributeName="stroke-dashoffset" from="50" to="0" dur="2s" linear infinite/>
+                                    </path>
+                                    <path d="M40 35 Q 60 45 80 50" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="0.5"/>
+                                    <path d="M20 55 Q 50 65 85 30" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="0.5"/>
+                                    <text x="5" y="8" class="hud-text">ВЕКТОР: СКАНИРОВАНИЕ</text>
+                                    <text x="5" y="95" class="hud-text">ГЛУБИНА БОРОЗД: 0.4MM</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-block" id="out-palm-text"></div>
+                </div>
+            </section>
+
+            <!-- 6. АСТРОЛОГИЯ -->
+            <section class="card reveal-on-scroll">
+                <h2><i data-lucide="moon" size="36" class="icon-premium-spin-reverse" stroke-width="1" style="opacity: 0.4;"></i> 06. Сферы Влияния</h2>
+                <div class="results-grid reverse">
+                    <div class="text-block" id="out-astro-text"></div>
+                    <div class="blueprint-container">
+                        <div class="image-box">
+                            <div class="image-inner" style="background: #050505;">
+                                <div class="scan-line-vertical" style="animation-duration: 6s; opacity: 0.5;"></div>
+                                <div class="hud-grid" style="opacity: 0.5;"></div>
+                                <svg class="hud-svg" id="natal-chart-svg" viewBox="0 0 100 100">
+                                    <path d="M 5 5 L 15 5 M 5 5 L 5 15 M 95 5 L 85 5 M 95 5 L 95 15 M 5 95 L 15 95 M 5 95 L 5 85 M 95 95 L 85 95 M 95 95 L 95 85" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="0.3"/>
+                                    <g id="natal-graphics" class="svg-spin-slow">
+                                        <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.2"/>
+                                        <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="0.5" stroke-dasharray="1 3"/>
+                                        <g stroke="rgba(255,255,255,0.1)" stroke-width="0.2">
+                                            <line x1="8" y1="50" x2="92" y2="50"/> <line x1="50" y1="8" x2="50" y2="92"/>
+                                            <line x1="20" y1="20" x2="80" y2="80"/> <line x1="20" y1="80" x2="80" y2="20"/>
+                                        </g>
+                                        <polygon id="aspect-1" points="50,12 80,65 20,65" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="0.3"/>
+                                        <polygon id="aspect-2" points="50,88 80,35 20,35" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.2" stroke-dasharray="1 1"/>
+                                        <circle cx="50" cy="12" r="2" fill="#fff"/>
+                                        <circle cx="80" cy="65" r="1.5" fill="#fff"/>
+                                        <circle cx="20" cy="65" r="1.8" fill="#fff"/>
+                                    </g>
+                                    <text x="5" y="8" class="hud-text" id="hud-zodiac-name">ЗОДИАК</text>
+                                    <text x="5" y="95" class="hud-text">КООРДИНАТЫ ПЛАНЕТ: ЗАФИКСИРОВАНО</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. ТАРО -->
+            <section class="card reveal-on-scroll tarot-section" id="section-tarot">
+                <h2><i data-lucide="layers" size="36" class="icon-premium-spin" stroke-width="1" style="opacity: 0.4;"></i> 07. Квантовый Расклад Таро</h2>
+                <p style="text-align: center; max-width: 800px; margin: 0 auto;">Система произвела строгую алгоритмическую выборку арканов, которые математически резонируют с вашим уникальным цифровым слепком. Этот расклад абсолютно индивидуален и отражает фундаментальные векторы вашего Прошлого, Настоящего и Будущего.</p>
+                
+                <div class="tarot-grid" id="tarot-container">
+                    <!-- Заполняется через JS -->
+                </div>
+            </section>
+
+            <!-- 8. ПРОГНОЗ ПО МЕСЯЦАМ -->
+            <section class="reveal-on-scroll" id="section-predictions" style="margin-top: 80px; margin-bottom: 80px;">
+                <h2 style="justify-content: center; margin-bottom: 80px;"><i data-lucide="calendar" size="40" class="icon-premium-spin-reverse" stroke-width="0.5" style="margin-right: 20px;"></i> 08. Навигатор: Годовой Цикл</h2>
+                <div id="out-preds" class="pred-grid"></div>
+            </section>
+
+            <!-- 9. ИТОГ И ФИНАЛЬНАЯ ИНФОГРАФИКА -->
+            <section class="card-grand-finale reveal-on-scroll">
+                <h2 style="justify-content: center; font-size: clamp(32px, 6vw, 56px); font-weight: 200; letter-spacing: 0.2em; margin-bottom: 80px; text-align: center; display: block;">ФУНДАМЕНТАЛЬНЫЙ СИНТЕЗ</h2>
+                <div class="final-report-container" id="out-final"></div>
+                
+                <div class="final-map-wrapper">
+                    <div class="hud-grid" style="opacity: 0.3; background-size: 5% 5%;"></div>
+                    <svg width="100%" height="100%" viewBox="0 0 600 600" style="position: relative; z-index: 5;">
+                        <defs><radialGradient id="glowDark" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.08" /><stop offset="100%" style="stop-color:#000000;stop-opacity:0" /></radialGradient></defs>
+                        <circle cx="300" cy="300" r="300" fill="url(#glowDark)" />
+                        <g class="svg-spin-slow">
+                            <circle cx="300" cy="300" r="260" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5" />
+                            <circle cx="300" cy="300" r="180" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.2" stroke-dasharray="1 5" />
+                            <circle cx="300" cy="300" r="90" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5" />
+                            <line x1="300" y1="20" x2="300" y2="580" stroke="rgba(255,255,255,0.05)" stroke-width="0.5" />
+                            <line x1="20" y1="300" x2="580" y2="300" stroke="rgba(255,255,255,0.05)" stroke-width="0.5" />
+                        </g>
+                        <path d="M300 120 L420 240 L380 440 L220 400 L180 200 Z" fill="rgba(255,255,255,0.02)" stroke="#fff" stroke-width="1">
+                            <animate attributeName="d" values="M300 120 L420 240 L380 440 L220 400 L180 200 Z; M300 80 L460 220 L340 480 L180 420 L140 240 Z; M300 120 L420 240 L380 440 L220 400 L180 200 Z" dur="20s" repeatCount="indefinite" />
+                        </path>
+                        <circle cx="300" cy="120" r="3" fill="#fff"/>
+                        <circle cx="420" cy="240" r="3" fill="#fff"/>
+                        <circle cx="380" cy="440" r="3" fill="#fff"/>
+                        <text x="300" y="303" fill="#fff" font-family="Space Mono" font-size="8" text-anchor="middle" letter-spacing="12" opacity="0.8">СИСТЕМА В НОРМЕ</text>
+                    </svg>
+                </div>
+                
+                <div class="premium-support-box">
+                    <div class="support-title">ЭКВИВАЛЕНТ ЭНЕРГИИ</div>
+                    <div class="support-line"></div>
+                    <p style="text-align: center; color: var(--text-muted); font-size: 13px; max-width: 700px; margin: 0 auto; line-height: 2;">Разработка системы АСТРА и её сложнейших аналитических алгоритмов потребовала сотен бессонных ночей. Этот мощный инструмент предоставляется вам абсолютно бесплатно, без скрытых платежей, подписок и навязчивой рекламы, чтобы каждый мог получить ключи к своей персональной матрице судьбы. Если этот разбор попал в самую точку, сэкономил вам годы поисков или дал внезапный мощный инсайт — восстановите универсальный энергетический баланс. Ваша добровольная поддержка — это единственное топливо для развития новых версий системы и лучшая личная благодарность её создателю.</p>
+                    <a href="https://messenger.online.sberbank.ru/sl/tOKtAMIicYmFm0AWZ" target="_blank" class="btn-donate">АКТИВИРОВАТЬ ЭНЕРГООБМЕН</a>
+                </div>
+            </section>
+
+            <!-- ТИТРЫ -->
+            <div class="credits-container">
+                <span class="credits-role">ГЛАВНЫЙ АРХИТЕКТОР И РАЗРАБОТЧИК АЛГОРИТМА</span>
+                <div class="credits-name">СЛАВА ГОРДЕЕВ</div>
+            </div>
+            
+            <footer style="text-align: center; padding-bottom: 60px; margin-top: 80px;">
+                <h3 style="letter-spacing: 0.8em; font-weight: 300; margin-bottom: 30px; font-size: 18px;">АСТРА</h3>
+                <p class="tech-font" style="text-align: center; color: var(--text-light);">ЭЛИТНЫЙ УРОВЕНЬ ДОСТУПА</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+
+        // ГЕНЕРАТОР УНИКАЛЬНОГО СИДА
+        function generateSeed(str) {
+            let h = 0;
+            for(let i = 0; i < str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+            return Math.abs(h);
+        }
+
+        // АСТРОЛОГИЧЕСКИЙ ВЫЧИСЛИТЕЛЬ ЗОДИАКА
+        function getZodiacInfo(dobString) {
+            if (!dobString) return { sign: "НЕИЗВЕСТНО", element: "ЭФИР", planet: "ПЛУТОН", trait: "скрытность" };
+            const parts = dobString.split('-');
+            const m = parseInt(parts[1], 10);
+            const d = parseInt(parts[2], 10);
+
+            if((m==3 && d>=21) || (m==4 && d<=19)) return { sign: "ОВЕН", element: "ОГОНЬ", planet: "МАРС", trait: "взрывная инициатива, агрессивное доминирование и нетерпеливость к слабостям других." };
+            if((m==4 && d>=20) || (m==5 && d<=20)) return { sign: "ТЕЛЕЦ", element: "ЗЕМЛЯ", planet: "ВЕНЕРА", trait: "монументальная устойчивость, гедонизм и абсолютная финансовая прагматичность." };
+            if((m==5 && d>=21) || (m==6 && d<=20)) return { sign: "БЛИЗНЕЦЫ", element: "ВОЗДУХ", planet: "МЕРКУРИЙ", trait: "холодный, адаптивный интеллект, способность менять маски и мастерство манипуляции." };
+            if((m==6 && d>=21) || (m==7 && d<=22)) return { sign: "РАК", element: "ВОДА", planet: "ЛУНА", trait: "непробиваемая внешняя броня, скрывающая колоссальную эмпатию и интуицию профайлера." };
+            if((m==7 && d>=23) || (m==8 && d<=22)) return { sign: "ЛЕВ", element: "ОГОНЬ", planet: "СОЛНЦЕ", trait: "солярный императив: потребность в безусловной власти, статусе и тотальном контроле своей империи." };
+            if((m==8 && d>=23) || (m==9 && d<=22)) return { sign: "ДЕВА", element: "ЗЕМЛЯ", planet: "МЕРКУРИЙ", trait: "хирургический перфекционизм, жестокий расчет деталей и патологическое стремление к порядку." };
+            if((m==9 && d>=23) || (m==10 && d<=22)) return { sign: "ВЕСЫ", element: "ВОЗДУХ", planet: "ВЕНЕРА", trait: "железная дипломатия, скрытая за элегантным фасадом, и безжалостный интеллект в переговорах." };
+            if((m==10 && d>=23) || (m==11 && d<=21)) return { sign: "СКОРПИОН", element: "ВОДА", planet: "ПЛУТОН", trait: "феноменальная выживаемость в кризисах, магнетизм и склонность к тотальному разрушению ради обновления." };
+            if((m==11 && d>=22) || (m==12 && d<=21)) return { sign: "СТРЕЛЕЦ", element: "ОГОНЬ", planet: "ЮПИТЕР", trait: "масштабная экспансия, независимость мышления и полное презрение к мелким правилам и рамкам." };
+            if((m==12 && d>=22) || (m==1 && d<=19)) return { sign: "КОЗЕРОГ", element: "ЗЕМЛЯ", planet: "САТУРН", trait: "ледяной прагматизм, маниакальная дисциплина и способность достигать целей любой ценой." };
+            if((m==1 && d>=20) || (m==2 && d<=18)) return { sign: "ВОДОЛЕЙ", element: "ВОЗДУХ", planet: "УРАН", trait: "разрушение устаревших систем, гениальность на грани безумия и холодная эмоциональная отстраненность." };
+            return { sign: "РЫБЫ", element: "ВОДА", planet: "НЕПТУН", trait: "сверхчувствительный радар, способность считывать матрицы людей и виртуозный уход от прямых ответов." };
+        }
+
+        // БАЗА ДАННЫХ: МАССИВЫ СВЕРХДЕТАЛЬНЫХ ПРОФИЛЕЙ
+        const DB_PAST = [
+            [
+                { icon: "archive", title: "Ранняя Броня", text: "Анализ ваших скрытых паттернов показывает, что базовая модель поведения сформировалась в условиях, где вам пришлось слишком рано повзрослеть. В юности вы часто брали на себя роль 'решалы' для своих близких. Вы привыкли, что мир не прощает слабости, поэтому с ранних лет выстроили вокруг себя непробиваемую стену компетентности и абсолютного контроля над ситуацией." },
+                { icon: "shield-alert", title: "Точка Излома", text: "В вашем прошлом зафиксирован системный кризис — момент внезапной потери опоры со стороны человека, которому вы доверяли. Эта ситуация навсегда отключила у вас опцию 'слепого доверия'. С тех пор вы сканируете любого нового человека на предмет потенциальной угрозы еще до того, как он успевает с вами заговорить. Вы больше не позволяете застать себя врасплох." },
+                { icon: "key", title: "Механизм Выживания", text: "Ваш текущий статус во многом базируется на старом страхе 'снова оказаться на дне'. Вы работаете не только ради денег, сколько ради создания тотальной безопасности для себя и семьи. Ваш гиперконтроль — это прямое следствие прошлых событий, где всё пошло не по плану из-за чужой некомпетентности. Ваш девиз: 'Хочешь, чтобы выжили все — управляй всем сам'." }
+            ],
+            [
+                { icon: "archive", title: "Хаос как Норма", text: "Ваш ретроспективный слепок говорит о том, что ваше становление проходило в условиях постоянной нестабильности или высоких ожиданий от вас. Среда требовала от вас молниеносной реакции и постоянной смены масок. Вы научились считывать настроение людей по малейшим изменениям в интонации. Теперь этот механизм работает как мощный радар, делая вас гениальным переговорщиком." },
+                { icon: "shield-alert", title: "Тень Отверженности", text: "Глубоко внутри зашит старый паттерн: вам часто приходилось доказывать свою ценность. В прошлом вас недооценивали или ставили на вторые роли. Эта несправедливость стала вашим 'ядерным топливом'. Вся ваша текущая карьера и стремление к власти — это блестяще реализованный план реванша. Вы заставили этот мир себя заметить." },
+                { icon: "key", title: "Иллюзия Близости", text: "В прошлом вы обожглись о то, что отдавали людям слишком много своего ресурса, не получая ничего взамен. Это сформировало текущий стиль коммуникации: вы можете казаться невероятно открытым и обаятельным, но на самом деле никого не пускаете в душу. Ваш истинный круг доверия состоит максимум из двух человек." }
+            ],
+            [
+                { icon: "archive", title: "Одиночество на Вершине", text: "Матрица вашего прошлого указывает на то, что вы всегда выделялись из толпы. Даже в детстве ваш образ мышления был сложнее, чем у сверстников, что неизбежно вело к чувству интеллектуальной изоляции. Вы рано поняли, что вас не понимают. Вместо того чтобы подстраиваться под серую массу, вы выбрали путь стратега, опирающегося только на свой интеллект." },
+                { icon: "shield-alert", title: "Цена Ошибки", text: "Ваш опыт пронизан ситуациями, где вы платили слишком высокую цену за малейшую неосторожность. Жизнь не давала поблажек. Любой просчет оборачивался для вас потерями. Именно поэтому сейчас ваш мозг работает как шахматный компьютер: вы просчитываете каждый шаг на десять ходов вперед и патологически ненавидите сюрпризы." },
+                { icon: "key", title: "Запрет на Слабость", text: "Ваша психика заблокировала возможность публичного проявления боли или растерянности. В прошлом, когда вы проявили уязвимость, ею воспользовались. Теперь, когда вам тяжело, вы просто стискиваете зубы и уходите в работу с головой. Люди видят лишь ваш железный фасад и не догадываются о цене этого статус-кво." }
+            ]
+        ];
+
+        const DB_NUM = [
+            [
+                { icon: "hash", title: "Архитектура Личности", text: "Ваш нейро-паттерн указывает на преобладание прагматичных контуров. В отличие от большинства, вы блокируете эмоции при сильном стрессе и переходите в режим 'холодного процессора'. Ваш пульс метафорически замедляется там, где другие начинают паниковать. Вы помните детали разговоров многолетней давности. Окружающие часто думают, что вы высокомерны, так как вы не заполняете тишину болтовней." },
+                { icon: "shield", title: "Фундаментальный Двигатель", text: "Ваш абсолютный приоритет — это бескомпромиссная личная свобода. Вы физически задыхаетесь от микроменеджмента и тупости окружающих. Вы способны демонстрировать продуктивность киборга, если проект принадлежит вам и вы устанавливаете правила, но мгновенно теряете всякую мотивацию под чужим давлением." }
+            ],
+            [
+                { icon: "hash", title: "Ядро Характера", text: "Анализ показывает феноменальный уровень врожденной хитрости ума. Вы способны выжить и извлечь выгоду в условиях тотального кризиса, когда остальные впадают в ступор. Ваш мозг молниеносно пересчитывает стратегии при изменении вводных данных. Вы — тот самый человек, который всегда выходит сухим из воды, оставляя конкурентов позади." },
+                { icon: "zap", title: "Ключевой Мотив", text: "Вами движет неистребимая жажда масштабного влияния. Вы органически не согласны на роли второго плана или жизнь 'как у всех'. Подсознательно вы всегда стремитесь занять позицию серого кардинала или открытого лидера-диктатора, чтобы лично устанавливать законы игры на своей доске." }
+            ],
+            [
+                { icon: "hash", title: "Структура Воли", text: "Вы обладаете психикой невероятной плотности. Вы не ломаетесь под давлением, вы лишь становитесь жестче. У вас встроен мощнейший внутренний критик, который не дает вам расслабиться ни на секунду. Вы ставите себе планки, которые недостижимы для 95% людей, и безжалостно требуете от себя их выполнения." },
+                { icon: "crosshair", title: "Социальный Интерфейс", text: "Малознакомым людям вы кажетесь человеком излишне расчетливым и отстраненным. Однако это лишь грамотно выстроенная система безопасности. За этим фасадом функционирует невероятно преданный механизм, готовый отдать максимум, но только тем, кто прошел ваши строгие многолетние проверки." }
+            ]
+        ];
+
+        const DB_PHYS = [
+            [
+                { icon: "scan-face", title: "Мышечный Тонус", text: "Результаты сканирования 128 точек лица: четкие линии нижней трети и микро-напряжение жевательных мышц являются биометрическим маркером привычки 'стискивать зубы' в трудные моменты. Ваша физиологическая выносливость рассчитана на изнурительные битвы на истощение." },
+                { icon: "eye", title: "Аналитика Взгляда", text: "Фокусировка вашего взгляда настроена на перманентный поиск уязвимостей. Вы за доли секунды считываете микровыражения и асимметрию лица собеседника при лжи. Попытки обмануть вас обречены на провал — ваш зрительный нерв улавливает фальшь мгновенно." },
+                { icon: "lock", title: "Эмоциональный Блок", text: "Вы виртуозно скрываете истинные переживания. В моменты колоссального форс-мажора датчики зафиксируют лишь вашу ледяную уверенность и прямой взгляд, даже если давление зашкаливает. Это делает вас эталонным переговорщиком." }
+            ],
+            [
+                { icon: "scan-face", title: "Профиль Стратега", text: "Сканирование выявляет мощный интеллектуальный потенциал верхней зоны лица. Вы способны к многоуровневому планированию. Вы не бьете наобум. Вы привыкли сначала собирать массив данных, выжидать ошибку противника, и только потом наносить точный удар." },
+                { icon: "crosshair", title: "Фокус Воли", text: "Прямой, тяжелый взгляд говорит о пугающе высоком уровне концентрации. Вы не позволяете чужим истерикам сбить вас с намеченного пути. Анализ показывает, что люди в 80% случаев отводят глаза первыми, не выдерживая плотности вашего визуального напора." },
+                { icon: "trending-up", title: "Коммерческая Сенсорика", text: "Пропорции лица (угол носа и посадка глаз) указывают на безупречную коммерческую логику и физиологический нюх на деньги. Бессмысленные эмоциональные траты вам чужды — вы оперируете исключительно понятием 'инвестиция'." }
+            ]
+        ];
+
+        const DB_PALM = [
+            [
+                { icon: "activity", title: "Вектор Витальности", text: "Анализ топографии вашей ладони (глубина борозд 0.4мм) свидетельствует о колоссальном резерве энергии. Организм настроен на выживание в экстремальных условиях. Вы способны работать за троих и восстанавливаться после пиковых интеллектуальных перегрузок." },
+                { icon: "cpu", title: "Когнитивная Борозда", text: "Угол наклона линии Ума по отношению к линии Жизни выдает жестко структурированный аппарат мышления. Вы презираете беспочвенные фантазии. Вы — превосходный системный архитектор, выстраивающий конструкцию победы задолго до начала игры." },
+                { icon: "award", title: "Линия Статуса", text: "Архитектура борозд судьбы декларирует: ваш фундаментальный жизненный успех не имеет абсолютно никакого отношения к слепой удаче. Ваш статус, авторитет и капитал — это результат исключительно вашей автономной, тяжелой работы." }
+            ],
+            [
+                { icon: "activity", title: "Индекс Прочности", text: "Микро-пересечения на холме Марса показывают, что первая треть вашей жизни была жестоким тренировочным полигоном. Зато сейчас ваш потенциал прочности и стрессоустойчивости кратно превышает показатели 95% людей вашего окружения." },
+                { icon: "heart", title: "Броня Эмпатии", text: "Несмотря на внешнюю непробиваемую жесткость, скрытые маркеры линии сердца указывают на глубокую способность к верности. Вы параноидально избирательны, но за тех немногих, кого вы пустили в свой ближний круг, вы готовы разорвать любого." },
+                { icon: "radio-receiver", title: "Потенциал Меркурия", text: "Развитая зона у основания мизинца наделяет вас пробивным даром нейролингвистического программирования. Вы умеете продать любую идею. Вы интуитивно подбираете код (слова, интонацию), чтобы оппонент принял вашу позицию как свою." }
+            ]
+        ];
+
+        const DB_FINAL = [
+            [
+                "ФУНДАМЕНТАЛЬНЫЙ СИНТЕЗ: Алгоритм безоговорочно классифицирует вас как прагматичного лидера с интуицией хищника. В моменты кризисов ваша нейронная сеть функционирует как сверхточный холодный процессор, полностью блокируя панику, истерику и деструктивные эмоции.",
+                "КРИТИЧЕСКАЯ УЯЗВИМОСТЬ: Единственный баг, способный обрушить вашу безупречную систему — это параноидальный гиперконтроль. Расход колоссальных объемов энергии на микроменеджмент и выполнение задач за некомпетентных людей ведет к тяжелейшему истощению ресурса.",
+                "ДИРЕКТИВА СИСТЕМЫ: Протокол выживания требует немедленного внедрения навыков безжалостного делегирования и агрессивной защиты вашего личного времени. Перенаправление сэкономленной энергии исключительно на ваши собственные, глобальные амбиции гарантирует вам квантовый скачок в доходах и статусе."
+            ],
+            [
+                "ФУНДАМЕНТАЛЬНЫЙ СИНТЕЗ: Вы являетесь автономным генератором системных изменений. Ваш интеллект и скорость обработки данных опережают ваше окружение на несколько ходов вперед, что часто вызывает у вас чувство раздражающего одиночества на вершине. Вы видите картину целиком.",
+                "КРИТИЧЕСКАЯ УЯЗВИМОСТЬ: Ваш патологический перфекционизм и нулевая терпимость к чужой медлительности создают вокруг вас зону высокого напряжения. Вы слишком часто сжигаете мосты там, где можно было бы проявить циничную дипломатию и извлечь выгоду.",
+                "ДИРЕКТИВА СИСТЕМЫ: Снизьте планку ожиданий от этого мира — он никогда не будет идеальным. Научитесь использовать людей с их неизбежными недостакатыми просто как инструменты для достижения вашей цели. Ваш истинный успех лежит через создание вышколенной лично вами команды."
+            ]
+        ];
+
+        const TAROT_DECK = [
+            { title: "I • МАГ", text: "Интеллект как главное оружие взлома системы. Вы осознали, что ни от кого не зависите, и обладаете полным спектром навыков для монетизации и материализации любой вашей идеи.", icon: "zap" },
+            { title: "II • ЖРИЦА", text: "Подключение к скрытым базам данных. Феноменальная интуиция. Способность считывать неочевидные паттерны поведения людей и видеть истинные мотивы.", icon: "moon" },
+            { title: "IV • ИМПЕРАТОР", text: "Построение личной, непоколебимой империи. Бескомпромиссная власть, высочайший социальный статус, монополия на принятие решений и агрессивная защита границ.", icon: "crown" },
+            { title: "VIII • СИЛА", text: "Обуздание внутренних демонов. Превосходство мягкой, интеллектуальной, спокойной силы и выдержки над грубым, животным давлением. Триумф интеллекта.", icon: "shield" },
+            { title: "XIII • СМЕРТЬ", text: "Радикальная трансформация. Полное, безжалостное хируррическое отсечение мертвых связей, старых проектов и иллюзий ради рождения нового этапа.", icon: "scissors" },
+            { title: "XVI • БАШНЯ", text: "Шоковое разрушение устаревших, гнилых систем. Этот болезненный скачок через кризис был необходим. Это расчистка площадки под закладку нового фундамента.", icon: "triangle-alert" },
+            { title: "ТРОЙКА МЕЧЕЙ", text: "Сверхточный холодный расчет, рожденный из горького опыта прошлого. Ваш интеллект теперь полностью лишен наивных романтических иллюзий.", icon: "swords" },
+            { title: "КОРОЛЬ ПЕНТАКЛЕЙ", text: "Непоколебимое управление плотным материальным миром. Финансовая стабильность, склонность к дорогому минимализму и осязаемая власть над активами.", icon: "coins" }
+        ];
+
+        const PRED_BASES = [
+            { l: "Жесткий прямой диалог для синхронизации с партнером. Оперируйте фактами.", h: "Критическое напряжение в шейной зоне (блок контроля). Нужен мануальный сброс.", m: "Активация финансового потока через забытые контакты. Инициируйте связь.", k: "Блокировка чужой ответственности. Запрет на решение проблем третьих лиц." },
+            { l: "Амплитуда эмоций на пике. Фаза высокой страсти. Отключите аналитику.", h: "Системе требуется информационный карантин. Отключение цифровых интерфейсов до сна.", m: "Тотальная стабилизация активов. Оптимальное окно для планирования инвестиций.", k: "Протокол ожидания. Форсирование событий сейчас приведет к системным сбоям." },
+            { l: "Индекс харизмы максимален. Благоприятное время для обновления имиджа.", h: "Пиковые значения физической энергии. Конвертация излишка в тяжелые тренировки.", m: "Резкий скачок профессионального статуса. Монетизация прошлых сверхусилий неизбежна.", k: "Контроль речевого аппарата. Ваша аналитическая критика обладает разрушительной силой." },
+            { l: "Режим автономности. Необходима социальная изоляция для перекалибровки.", h: "Уязвимость ЖКТ из-за стресса. Переход на легкоусвояемый, теплый рацион.", m: "Период аккумуляции. Введен строгий запрет на спонтанные транзакции.", k: "Внутренняя честность. Болезненная деконструкция иллюзий в избегаемом вопросе." },
+            { l: "Инициация сюрприза с вашей стороны даст троекратный возврат энергии.", h: "Биоритмы функционируют безупречно. Система в идеальном физическом балансе.", m: "Окно для просчитанного риска. Новая бизнес-идея даст сверхприбыль.", k: "Активация протокола 'Щедрость'. Безвозмездная инвестиция в менее сильного." },
+            { l: "Сброс токсичного напряжения в отношениях. Старые конфликты аннулируются.", h: "Оксигенация системы. Увеличение пеших маршрутов стабилизирует нервный фон.", m: "Жесткий аудит пассивов. Немедленное отсечение скрытых микро-трат восстановит баланс.", k: "Калибровка энергообмена. Обучение сложному для вас навыку принимать помощь." },
+            { l: "Попытка реинтеграции элемента из прошлого. Это тест матрицы, возврат нецелесообразен.", h: "Снижение ресурса. Требуется императивное планирование паузы в операционной деятельности.", m: "Внеплановое зачисление солидных дивидендов (возврат долга, скрытая премия).", k: "Протокол жесткого отсечения. Ликвидация сред, где ваша ценность подвергается сомнению." },
+            { l: "Синхронизация с партнером 100%. Формирование интеллектуально неуязвимой команды.", h: "Водная среда как катализатор. Резкое увеличение потребления H2O и контакт с водоемами.", m: "Монетизация интеллектуального капитала. Повышение стоимости личного часа на 30%.", k: "Отказ от проекции собственных высочайших стандартов на обычных индивидов." },
+            { l: "Сектор карьеры поглощает 90% ресурса. Внимание: резервируйте время для близких.", h: "Риск перегрузки связочного аппарата. Требуется снижение ударных нагрузок.", m: "Триумфальная фаза. Личный бренд начинает генерировать полностью автономный доход.", k: "Тест на эго-контроль. Сохранение абсолютной адекватности при пиковых позициях." },
+            { l: "Интеграция нового человека в вашу систему через перемещения или бизнес-обучение.", h: "Дефицит перезагрузки. Обязательное увеличение фазы глубокого сна ровно на 60 минут.", m: "Цифровые инвестиции. Сферы IT и инноваций дадут максимальный ROI.", k: "Осознание того, что дальнейшее масштабирование империи невозможно без команды." },
+            { l: "Сбой аналитики: склонность к созданию несуществующих проблем. Директива: расслабление.", h: "Снижение барьерных функций организма. Обязательная превентивная витаминизация.", m: "Логические алгоритмы неэффективны. Переход на интуитивное управление финансами.", k: "Полная деактивация масок. Демонстрация подлинной, жесткой структуры личности." },
+            { l: "Глобальное обнуление устаревших связей. Загрузка новых отношений сверхвысокого уровня.", h: "100% заряд батареи. Готовность к задачам высшего уровня сложности.", m: "Зеленый свет для 'безумных' финансовых стратегий. Вероятность успеха стремится к абсолюту.", k: "Императив чистой смелости. Блокировка сомнений. Ваша кармическая обязанность — делать первый шаг." }
+        ];
+
+        function preview(input, type) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.getElementById('img-' + type);
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    if(type === 'face') document.getElementById('res-face').src = e.target.result;
+                    if(type === 'palm') document.getElementById('res-palm').src = e.target.result;
+                    input.parentElement.querySelector('.upload-content').style.opacity = '0';
+                    input.parentElement.querySelector('.corner-1').style.borderColor = 'var(--accent)';
+                    input.parentElement.querySelector('.corner-2').style.borderColor = 'var(--accent)';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function getDynamicMonths() {
+            const names = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+            const now = new Date();
+            let m = now.getMonth();
+            let y = now.getFullYear();
+            const res = [];
+            for (let i = 0; i < 12; i++) {
+                res.push(`${names[m]} ${y}`);
+                m++; if (m > 11) { m = 0; y++; }
+            }
+            return res;
+        }
+
+        function getGeoAnalysis(name, loc, seed) {
+            const locText = loc.trim() ? `геокоординат: ${loc.toUpperCase()}` : 'геокоординат вашей локации';
+            const nameArr = name.trim().split(' ');
+            const firstName = nameArr[0].toUpperCase();
+            const lastName = nameArr.length > 1 ? nameArr[nameArr.length - 1].toUpperCase() : 'РОДА';
+            
+            const firstArchetypes = [
+                "Вы доверяете только тому, что можно измерить и монетизировать.",
+                "Вы способны менять убеждения людей незаметно для них самих.",
+                "Вы ставите себе и окружающим жесткие планки и не терпите слабостей.",
+                "Вы генерируете энергию, чтобы единолично выстроить из нее новую структуру."
+            ];
+            
+            const lastArchetypes = [
+                "наследственный код 'одинокого волка'. Ваша ветвь привыкла опираться только на себя.",
+                "родовой паттерн выживания через борьбу. У вас зашит запрет на расслабление.",
+                "эгрегор скрытой власти. Талант управлять процессами из тени.",
+                "кармический долг трансформатора. Вы призваны разрушить негативные сценарии прошлого."
+            ];
+
+            return [
+                { icon: "type", title: `Код Имени: ${firstName}`, text: `Спектрограмма вашего имени выявляет доминирующие частоты 'вектора атаки'. Это формирует паттерн бессознательного лидерства. ${firstArchetypes[seed % firstArchetypes.length]} Люди считывают этот код при первом обращении, что дает вам начальное преимущество в любых жестких переговорах.` },
+                { icon: "git-merge", title: `Архитектура Фамилии: ${lastName}`, text: `Частотный анализ эгрегора фамилии указывает на накопленный поколениями код. Вы унаследовали системную 'генетическую память' выживания и ${lastArchetypes[seed % lastArchetypes.length]} Эта линия работает как мощный щит, блокирующий попытки внешнего управления вашей волей.` },
+                { icon: "map-pin", title: "Геомагнитный Вектор", text: `Фиксация ${locText} на момент вашего рождения задала специфический, 'утяжеленный' наклон оси в вашей персональной системе. Эта географическая привязка сформировала феноменальную стрессоустойчивость. Вы обладаете циничной 'земной' плотностью — вы крепко стоите на ногах и никогда не бежите от открытых конфликтов.` }
+            ];
+        }
+
+        function typeWriter(element, text, speed = 30) {
+            element.innerHTML = '';
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        function initScrollReveal() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        
+                        if(entry.target.id === 'section-tarot') {
+                            const cards = entry.target.querySelectorAll('.tarot-card');
+                            cards.forEach((card, index) => {
+                                setTimeout(() => { card.classList.add('flipped'); }, 500 + (index * 500));
+                            });
+                        }
+                        observer.unobserve(entry.target); 
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+        }
+
+        function process() {
+            const name = document.getElementById('in-name').value;
+            const dob = document.getElementById('in-dob').value;
+            const loc = document.getElementById('in-loc').value;
+            const face = document.getElementById('img-face').src;
+            const palm = document.getElementById('img-palm').src;
+
+            if (!name || !dob || !face || !palm) { 
+                alert("[ СИСТЕМНОЕ УВЕДОМЛЕНИЕ ]\nТребуется полная инициализация: заполните текстовые поля и загрузите биометрические данные (Лицо, Ладонь)."); 
+                return; 
+            }
+
+            document.getElementById('step-0').style.display = 'none';
+            document.getElementById('step-0').classList.remove('active');
+            window.scrollTo(0,0);
+            
+            const step1 = document.getElementById('step-1');
+            step1.style.display = 'flex';
+            step1.classList.add('active');
+
+            const msgs = ["СБОР ГЕО-ДАННЫХ И АНАЛИЗ ФАМИЛИИ...", "КАЛИБРОВКА БИОМЕТРИЧЕСКИХ ПАТТЕРНОВ...", "ИЗВЛЕЧЕНИЕ АРХИВОВ ТЕНЕВОГО ПРОШЛОГО...", "ВЫЧИСЛЕНИЕ АСТРОНОМИЧЕСКОГО ЯДРА...", "СИНТЕЗ ИТОГОВОГО ОТЧЕТА..."];
+            let mIdx = 0;
+            const msgEl = document.getElementById('loading-msg');
+            const interval = setInterval(() => {
+                mIdx++;
+                if(mIdx < msgs.length) typeWriter(msgEl, msgs[mIdx], 20);
+            }, 1300);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                step1.style.display = 'none';
+                step1.classList.remove('active');
+                
+                const step2 = document.getElementById('step-2');
+                step2.style.display = 'block';
+                step2.classList.add('active');
+                
+                render(name, dob, loc);
+            }, 7500); 
+        }
+
+        function render(name, dob, loc) {
+            const seed = generateSeed(name + dob + loc);
+            
+            document.getElementById('out-name').innerText = name;
+            
+            const baseEnergy = 85 + (seed % 15);
+            const baseIQ = 110 + (seed % 35);
+            const baseAdapt = 75 + (seed % 25);
+            const baseWill = 80 + (seed % 20);
+            
+            document.getElementById('out-number').innerText = (seed % 9) + 1;
+            
+            const animateCounter = (id, target) => {
+                let curr = 0;
+                const el = document.getElementById(id);
+                const int = setInterval(() => {
+                    curr += Math.ceil(target/20);
+                    if(curr >= target) { el.innerText = target; clearInterval(int); }
+                    else { el.innerText = curr; }
+                }, 40);
+            };
+            animateCounter('stat-1', baseIQ);
+            animateCounter('stat-2', baseAdapt);
+            animateCounter('stat-3', baseWill);
+            animateCounter('stat-4', baseEnergy);
+
+            const rot1 = (seed % 360);
+            const rot2 = ((seed * 2) % 360);
+            document.getElementById('aspect-1').setAttribute('transform', `rotate(${rot1} 50 50)`);
+            document.getElementById('aspect-2').setAttribute('transform', `rotate(${rot2} 50 50)`);
+
+            const renderBlock = (divId, dataArrayBase) => {
+                const div = document.getElementById(divId);
+                div.innerHTML = "";
+                const dataArray = dataArrayBase[seed % dataArrayBase.length];
+                dataArray.forEach((item) => {
+                    div.innerHTML += `
+                        <div class="reveal-point active">
+                            <h4><i data-lucide="${item.icon}" size="20" stroke-width="1.5" class="icon-premium-spin"></i> ${item.title}</h4>
+                            <p>${item.text}</p>
+                        </div>
+                    `;
+                });
+            };
+
+            const geoDiv = document.getElementById('out-geo-text');
+            geoDiv.innerHTML = "";
+            getGeoAnalysis(name, loc, seed).forEach(item => {
+                geoDiv.innerHTML += `<div class="reveal-point active"><h4><i data-lucide="${item.icon}" size="20" stroke-width="1.5" class="icon-premium-spin"></i> ${item.title}</h4><p>${item.text}</p></div>`;
+            });
+
+            const astroDiv = document.getElementById('out-astro-text');
+            astroDiv.innerHTML = "";
+            const zodiac = getZodiacInfo(dob);
+            document.getElementById('hud-zodiac-name').innerText = `ЗОДИАК: ${zodiac.sign}`;
+            
+            const astroData = [
+                { icon: "sun", title: `Зодиакальное Ядро: ${zodiac.sign}`, text: `Анализ вашей даты рождения выявил абсолютную доминанту знака ${zodiac.sign}. Ваш базовый алгоритм продиктован управляющей планетой (${zodiac.planet}), которая закладывает в вас ${zodiac.trait} Вы не созданы для подчинения.` },
+                { icon: "star", title: `Доминанта: Стихия ${zodiac.element}`, text: `Стихия ${zodiac.element} определяет ваш способ обработки информации. Вы не 'улетаете' в пустые абстрактные теории, если они не приносят жесткого, осязаемого результата в вашей реальности. Ваш главный девиз: любая блестящая идея должна быть реализована на практике.` },
+                { icon: "compass", title: "Внешний Асцендент", text: `Первичный визуальный код, который вы транслируете в социум, считывается как 'дорого, опасно, недоступно'. Вы обладаете безошибочным чувством стиля и статуса. Этот навык грамотной, агрессивной визуальной упаковки заставляет людей воспринимать вас всерьез с первой секунды.` },
+                { icon: "zap", title: "Напряженные Аспекты", text: `В вашей натальной карте присутствуют жесткие, тригональные квадратуры. Это значит, что карма не дает вам ничего 'на блюдечке'. Ваш путь — это вечная борьба с обстоятельствами. Но именно это колоссальное сопротивление среды выковало ваш текущий стальной характер.` }
+            ];
+            
+            astroData.forEach(item => {
+                astroDiv.innerHTML += `<div class="reveal-point active"><h4><i data-lucide="${item.icon}" size="20" stroke-width="1.5" class="icon-premium-spin-reverse"></i> ${item.title}</h4><p>${item.text}</p></div>`;
+            });
+
+            renderBlock('out-past-text', DB_PAST);
+            renderBlock('out-num-text', DB_NUM);
+            renderBlock('out-phys-text', DB_PHYS);
+            renderBlock('out-palm-text', DB_PALM);
+
+            const fDiv = document.getElementById('out-final');
+            fDiv.innerHTML = "";
+            DB_FINAL[seed % DB_FINAL.length].forEach((t) => {
+                fDiv.innerHTML += `<p>${t}</p>`;
+            });
+
+            const tarotContainer = document.getElementById('tarot-container');
+            tarotContainer.innerHTML = "";
+            const tLabels = ["ПРОШЛОЕ", "НАСТОЯЩЕЕ", "БУДУЩЕЕ"];
+            for(let i=0; i<3; i++) {
+                const card = TAROT_DECK[(seed + i * 4) % TAROT_DECK.length];
+                tarotContainer.innerHTML += `
+                    <div class="tarot-card-wrapper">
+                        <div class="tarot-card">
+                            <div class="tarot-face tarot-back"><i data-lucide="compass" stroke-width="1"></i></div>
+                            <div class="tarot-face tarot-front">
+                                <div class="tarot-time">${tLabels[i]}</div>
+                                <i data-lucide="${card.icon}" size="40" class="tarot-icon icon-premium-spin" stroke-width="1"></i>
+                                <div class="tarot-title">${card.title}</div>
+                                <div class="tarot-text">${card.text}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const mList = getDynamicMonths();
+            const prGrid = document.getElementById('out-preds');
+            prGrid.innerHTML = "";
+            mList.forEach((monthName, i) => {
+                const b = PRED_BASES[(seed + i * 3) % PRED_BASES.length];
+                prGrid.innerHTML += `
+                    <div class="pred-card">
+                        <div class="pred-month">${monthName.toUpperCase()}</div>
+                        <div class="pred-row"><span class="pred-tag"><i data-lucide="heart" size="12" class="icon-premium-spin"></i> Сфера Чувств</span><p class="pred-txt">${b.l}</p></div>
+                        <div class="pred-row"><span class="pred-tag"><i data-lucide="activity" size="12" class="icon-premium-spin"></i> Витальность</span><p class="pred-txt">${b.h}</p></div>
+                        <div class="pred-row"><span class="pred-tag"><i data-lucide="briefcase" size="12" class="icon-premium-spin"></i> Капитал</span><p class="pred-txt">${b.m}</p></div>
+                        <div class="pred-row"><span class="pred-tag" style="color:var(--accent);"><i data-lucide="crosshair" size="12" class="icon-premium-spin"></i> Фокус</span><p class="pred-txt" style="font-weight:500; color:var(--accent);">${b.k}</p></div>
+                    </div>
+                `;
+            });
+
+            setTimeout(() => { 
+                if (typeof lucide !== 'undefined') lucide.createIcons(); 
+                initScrollReveal();
+            }, 100);
+        }
+    </script>
+</body>
+</html>
